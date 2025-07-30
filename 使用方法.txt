@@ -27,23 +27,9 @@ ExcelのA列、B列、C列のデータをC言語のテーブル形式でテキ�
 1. Alt + F11 でVBAエディタを開きます
 2. 「挿入」→「標準モジュール」で新しいモジュールを作成
 3. ExcelToCTable.vbaの内容をコピー＆ペーストします
-4. F5 または 実行ボタンでマクロを実行します
-
-### 3. 利用可能なマクロ
-
-#### ExportToCTable()
-- 文字列データ用
-- データを文字列として扱います
-- 出力ファイル: table_data.c
-
-#### ExportToCTableNumeric()
-- 数値データ用
-- データを数値（double型）として扱います
-- 出力ファイル: numeric_table.c
+4. F5 または 実行ボタンで ExportToCTable() マクロを実行します
 
 ## 出力例
-
-### 文字列データの場合（ExportToCTable実行時）
 
 ```c
 /* Generated C Table from Excel Data */
@@ -80,36 +66,11 @@ void print_table() {
 }
 ```
 
-### 数値データの場合（ExportToCTableNumeric実行時）
-
-```c
-/* Generated Numeric C Table from Excel Data */
-#include <stdio.h>
-
-typedef struct {
-    double col_a;
-    double col_b;
-    double col_c;
-} NumericRow;
-
-NumericRow numeric_table[] = {
-    {1.5, 2.3, 4.7},
-    {3.8, 1.2, 6.9},
-    {2.1, 5.4, 3.3}
-};
-
-#define NUMERIC_TABLE_SIZE (sizeof(numeric_table) / sizeof(numeric_table[0]))
-```
-
 ## 注意事項
 
-1. **ファイル保存先**: 生成されたCファイルはExcelファイルと同じフォルダに保存されます
-2. **データ型**: 
-   - ExportToCTable(): 文字列として処理
-   - ExportToCTableNumeric(): 数値として処理
-3. **空のセル**: 
-   - 文字列版: "NULL" として出力
-   - 数値版: 0.0 として出力
+1. **ファイル保存先**: 生成されたCファイル（table_data.c）はExcelファイルと同じフォルダに保存されます
+2. **データ型**: 全て文字列（const char*）として処理されます
+3. **空のセル**: "NULL" として出力されます
 4. **ヘッダー行**: 1行目はヘッダーとして扱われ、データには含まれません
 
 ## カスタマイズ
