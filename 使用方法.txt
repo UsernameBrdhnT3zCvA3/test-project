@@ -1,0 +1,151 @@
+VBAマクロによるExcelデータからC言語テーブル生成ツール
+=======================================================
+
+## 概要
+ExcelのA列、B列、C列のデータをC言語のテーブル形式でテキストファイルに出力するVBAマクロです。
+
+## ファイル
+- ExcelToCTable.vba : VBAマクロファイル
+
+## 使用方法
+
+### 1. Excelファイルの準備
+- Excelファイルを開きます
+- A列、B列、C列にデータを入力します
+- 1行目はヘッダー行として扱われます（データに含まれません）
+- 2行目以降がデータとして処理されます
+
+例：
+    A列       B列       C列
+    -------   -------   -------
+    Name      Age       City      ← ヘッダー行
+    田中      25        東京      ← データ行
+    佐藤      30        大阪      ← データ行
+    鈴木      28        名古屋    ← データ行
+
+### 2. VBAマクロの実行
+1. Alt + F11 でVBAエディタを開きます
+2. 「挿入」→「標準モジュール」で新しいモジュールを作成
+3. ExcelToCTable.vbaの内容をコピー＆ペーストします
+4. F5 または 実行ボタンでマクロを実行します
+
+### 3. 利用可能なマクロ
+
+#### ExportToCTable()
+- 文字列データ用
+- データを文字列として扱います
+- 出力ファイル: table_data.c
+
+#### ExportToCTableNumeric()
+- 数値データ用
+- データを数値（double型）として扱います
+- 出力ファイル: numeric_table.c
+
+## 出力例
+
+### 文字列データの場合（ExportToCTable実行時）
+
+```c
+/* Generated C Table from Excel Data */
+/* Columns: A, B, C */
+
+#include <stdio.h>
+
+typedef struct {
+    const char* col_a;
+    const char* col_b;
+    const char* col_c;
+} TableRow;
+
+TableRow data_table[] = {
+    {"田中", "25", "東京"},
+    {"佐藤", "30", "大阪"},
+    {"鈴木", "28", "名古屋"}
+};
+
+#define TABLE_SIZE (sizeof(data_table) / sizeof(data_table[0]))
+
+/* Sample function to print table data */
+void print_table() {
+    int i;
+    printf("Table Data (%d rows):\n", TABLE_SIZE);
+    printf("%-20s %-20s %-20s\n", "Column A", "Column B", "Column C");
+    printf("------------------------------------------------------------------------\n");
+    for (i = 0; i < TABLE_SIZE; i++) {
+        printf("%-20s %-20s %-20s\n",
+               data_table[i].col_a ? data_table[i].col_a : "(null)",
+               data_table[i].col_b ? data_table[i].col_b : "(null)",
+               data_table[i].col_c ? data_table[i].col_c : "(null)");
+    }
+}
+```
+
+### 数値データの場合（ExportToCTableNumeric実行時）
+
+```c
+/* Generated Numeric C Table from Excel Data */
+#include <stdio.h>
+
+typedef struct {
+    double col_a;
+    double col_b;
+    double col_c;
+} NumericRow;
+
+NumericRow numeric_table[] = {
+    {1.5, 2.3, 4.7},
+    {3.8, 1.2, 6.9},
+    {2.1, 5.4, 3.3}
+};
+
+#define NUMERIC_TABLE_SIZE (sizeof(numeric_table) / sizeof(numeric_table[0]))
+```
+
+## 注意事項
+
+1. **ファイル保存先**: 生成されたCファイルはExcelファイルと同じフォルダに保存されます
+2. **データ型**: 
+   - ExportToCTable(): 文字列として処理
+   - ExportToCTableNumeric(): 数値として処理
+3. **空のセル**: 
+   - 文字列版: "NULL" として出力
+   - 数値版: 0.0 として出力
+4. **ヘッダー行**: 1行目はヘッダーとして扱われ、データには含まれません
+
+## カスタマイズ
+
+### データ型の変更
+VBAコード内の以下の部分を変更することで、データ型をカスタマイズできます：
+
+```vba
+dataType = "const char*"  ' この部分を変更
+```
+
+例：
+- `"int"` : 整数型
+- `"float"` : 浮動小数点型
+- `"const char*"` : 文字列型
+
+### テーブル名の変更
+```vba
+tableName = "data_table"  ' この部分を変更
+```
+
+### 出力ファイル名の変更
+```vba
+filePath = ThisWorkbook.Path & "\table_data.c"  ' この部分を変更
+```
+
+## トラブルシューティング
+
+1. **「データが見つかりません」エラー**
+   - A列にデータが入力されているか確認してください
+   - 最低2行（ヘッダー + データ）が必要です
+
+2. **ファイルが生成されない**
+   - Excelファイルが保存されているか確認してください
+   - 書き込み権限があるフォルダか確認してください
+
+3. **文字化け**
+   - Excelファイルの文字コードを確認してください
+   - 必要に応じてUTF-8で保存し直してください
