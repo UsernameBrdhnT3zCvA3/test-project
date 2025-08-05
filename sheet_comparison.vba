@@ -130,40 +130,10 @@ Sub CompareSheets()
         End If
     Next row1
     
-    ' 結果の表示と書式設定
+    ' 結果の表示
     If outputRow > 5 Then
         ' 差分がある場合のみメッセージ表示
         MsgBox (outputRow - 5) & "件の差分が見つかりました。" & SHEET3_NAME & "に出力しました。", vbInformation
     End If
-    
-    ' Sheet3の書式設定（差分の有無に関わらず実行）
-    ' シート名の行（1行目）
-    With ws3.Range("B1:Y1")
-        .Font.Bold = True
-        .Interior.Color = RGB(180, 180, 180)
-    End With
-    
-    ' ヘッダー行（3行目）
-    With ws3.Range("B3:Y3")
-        .Font.Bold = True
-        .Interior.Color = RGB(220, 220, 220)
-    End With
-    
-    ' 罫線を追加（データがある場合のみ）
-    If outputRow > 5 Then
-        With ws3.Range("B1:Y" & (outputRow - 1))
-            .Borders.LineStyle = xlContinuous
-            .Borders.Weight = xlThin
-        End With
-    Else
-        ' データがない場合はヘッダーのみ罫線
-        With ws3.Range("B1:Y3")
-            .Borders.LineStyle = xlContinuous
-            .Borders.Weight = xlThin
-        End With
-    End If
-    
-    ' 列幅の自動調整
-    ws3.Columns("B:Y").AutoFit
     
 End Sub
