@@ -10,18 +10,38 @@
 
 ## 使用方法
 
+### 方法1: 固定シート名版（CompareSheets）
+
 1. Excel ファイルに以下のシートを用意してください：
-   - **Sheet1**: 比較元データ（B列～N列、ただしH列・I列は除外）
-   - **Sheet2**: 比較先データ（B列～L列）
-   - **Sheet3**: 結果出力先（自動でクリアされます）
+   - **比較元シート**: B列～N列（ただしH列・I列は除外）
+   - **比較先シート**: B列～L列
+   - **結果出力シート**: 自動でクリアされます
 
 2. VBAエディタを開き（Alt + F11）、新しいモジュールを作成
 
 3. `sheet_comparison.vba` の内容をコピー＆ペーストします
 
-4. マクロを実行：
+4. **シート名を変更する場合**：
+   ```vba
+   Const SHEET1_NAME As String = "データ1"     ' ← 比較元シート名
+   Const SHEET2_NAME As String = "データ2"     ' ← 比較先シート名
+   Const SHEET3_NAME As String = "比較結果"    ' ← 結果出力シート名
+   ```
+
+5. マクロを実行：
    - VBAエディタで `CompareSheets` サブルーチンを選択してF5キー
    - または Excel のリボンから「開発」→「マクロ」→「CompareSheets」を実行
+
+### 方法2: 動的シート名版（CompareSheets_WithInput）
+
+1. `sheet_comparison_with_input.vba` の内容をコピー＆ペーストします
+
+2. マクロを実行すると、以下のダイアログが順番に表示されます：
+   - 「比較元シート名を入力してください」
+   - 「比較先シート名を入力してください」
+   - 「結果出力シート名を入力してください」
+
+3. 各シート名を入力して実行
 
 ## 出力結果
 
@@ -46,16 +66,21 @@
 
 ## カスタマイズ
 
-必要に応じて以下の部分を修正できます：
-
+### シート名の変更
 ```vba
-' シート名の変更
-Set ws1 = ThisWorkbook.Sheets("Sheet1")  ' ← シート名を変更
-Set ws2 = ThisWorkbook.Sheets("Sheet2")  ' ← シート名を変更
-Set ws3 = ThisWorkbook.Sheets("Sheet3")  ' ← シート名を変更
+' 固定シート名版の場合
+Const SHEET1_NAME As String = "データ1"     ' ← 比較元シート名
+Const SHEET2_NAME As String = "データ2"     ' ← 比較先シート名
+Const SHEET3_NAME As String = "比較結果"    ' ← 結果出力シート名
+```
 
+### その他の設定変更
+```vba
 ' 比較開始行の変更
 For row1 = 2 To maxRow  ' ← 2を変更すると開始行を変更可能
+
+' 出力開始行の変更
+outputRow = 5  ' ← 5を変更すると出力開始行を変更可能
 
 ' 比較列の変更
 sheet1Cols = Array(2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14)  ' ← 列番号配列

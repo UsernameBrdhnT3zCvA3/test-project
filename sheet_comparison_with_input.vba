@@ -1,9 +1,6 @@
-Sub CompareSheets()
-    ' ★ここでシート名を設定してください ★
-    Const SHEET1_NAME As String = "Sheet1"
-    Const SHEET2_NAME As String = "Sheet2"
-    Const SHEET3_NAME As String = "Sheet3"
-    
+Sub CompareSheets_WithInput()
+    ' シート名を入力で指定
+    Dim sheet1Name As String, sheet2Name As String, sheet3Name As String
     Dim ws1 As Worksheet, ws2 As Worksheet, ws3 As Worksheet
     Dim lastRow1 As Long, lastRow2 As Long, maxRow As Long
     Dim row1 As Long, row2 As Long, outputRow As Long
@@ -11,18 +8,30 @@ Sub CompareSheets()
     Dim isDifferent As Boolean
     Dim sheet1Data As String, sheet2Data As String
     
-    ' シートの設定
-    Set ws1 = ThisWorkbook.Sheets(SHEET1_NAME)
-    Set ws2 = ThisWorkbook.Sheets(SHEET2_NAME)
-    Set ws3 = ThisWorkbook.Sheets(SHEET3_NAME)
+    ' シート名を入力で取得
+    sheet1Name = InputBox("比較元シート名を入力してください:", "シート名入力", "Sheet1")
+    If sheet1Name = "" Then Exit Sub
+    
+    sheet2Name = InputBox("比較先シート名を入力してください:", "シート名入力", "Sheet2")
+    If sheet2Name = "" Then Exit Sub
+    
+    sheet3Name = InputBox("結果出力シート名を入力してください:", "シート名入力", "Sheet3")
+    If sheet3Name = "" Then Exit Sub
+    
+    ' シートが存在するかチェック
+    On Error GoTo SheetNotFound
+    Set ws1 = ThisWorkbook.Sheets(sheet1Name)
+    Set ws2 = ThisWorkbook.Sheets(sheet2Name)
+    Set ws3 = ThisWorkbook.Sheets(sheet3Name)
+    On Error GoTo 0
     
     ' Sheet3をクリア
     ws3.Cells.Clear
     
     ' シート名を上部に表示
     ws3.Range("A1").Value = "Row"
-    ws3.Range("B1").Value = SHEET1_NAME
-    ws3.Range("N1").Value = SHEET2_NAME
+    ws3.Range("B1").Value = sheet1Name
+    ws3.Range("N1").Value = sheet2Name
     
     ' Sheet1とSheet2からヘッダーを取得して設定
     Dim sheet1Cols As Variant
@@ -114,7 +123,7 @@ Sub CompareSheets()
         MsgBox "差分は見つかりませんでした。", vbInformation
         ws3.Range("A5").Value = "差分なし"
     Else
-        MsgBox (outputRow - 5) & "件の差分が見つかりました。" & SHEET3_NAME & "に出力しました。", vbInformation
+        MsgBox (outputRow - 5) & "件の差分が見つかりました。" & sheet3Name & "に出力しました。", vbInformation
         
         ' Sheet3の書式設定
         ' シート名の行（1行目）
@@ -138,5 +147,11 @@ Sub CompareSheets()
         ' 列幅の自動調整
         ws3.Columns("A:Y").AutoFit
     End If
+    
+    Exit Sub
+    
+SheetNotFound:
+    MsgBox "指定されたシートが見つかりません。シート名を確認してください。", vbCritical
+    Exit Sub
     
 End Sub
