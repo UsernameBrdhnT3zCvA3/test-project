@@ -98,7 +98,7 @@ Sub CompareSheets()
                     End If
                     
                     If CStr(ws1.Cells(row1, sheet1Cols(col)).Value) <> sheet2Value Then
-                        ws3.Cells(outputRow, outputCol).Interior.Color = RGB(255, 200, 200) ' 薄い赤
+                        ws3.Cells(outputRow, outputCol).Interior.Color = RGB(255, 255, 200) ' 薄い黄色
                     End If
                 End If
                 outputCol = outputCol + 1
@@ -120,7 +120,7 @@ Sub CompareSheets()
                     End If
                     
                     If CStr(ws2.Cells(row1, sheet2Cols(col)).Value) <> sheet1Value Then
-                        ws3.Cells(outputRow, outputCol).Interior.Color = RGB(200, 200, 255) ' 薄い青
+                        ws3.Cells(outputRow, outputCol).Interior.Color = RGB(255, 255, 200) ' 薄い黄色
                     End If
                 End If
                 outputCol = outputCol + 1
