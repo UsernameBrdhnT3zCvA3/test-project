@@ -20,7 +20,6 @@ Sub CompareSheets()
     ws3.Cells.Clear
     
     ' シート名を上部に表示
-    ws3.Range("A1").Value = "Row"
     ws3.Range("B1").Value = SHEET1_NAME
     ws3.Range("N1").Value = SHEET2_NAME
     
@@ -83,14 +82,24 @@ Sub CompareSheets()
         
         ' 差分がある場合、Sheet3に出力
         If isDifferent Then
-            ws3.Cells(outputRow, 1).Value = row1 ' 行番号
-            
             ' Sheet1のデータを出力（B列～）
             outputCol = 2 ' B列から開始
             
             For col = 0 To UBound(sheet1Cols)
                 If row1 <= lastRow1 Then
                     ws3.Cells(outputRow, outputCol).Value = ws1.Cells(row1, sheet1Cols(col)).Value
+                    
+                    ' 対応するSheet2のデータと比較して色を付ける
+                    Dim sheet2Value As String
+                    If row1 <= lastRow2 Then
+                        sheet2Value = CStr(ws2.Cells(row1, sheet2Cols(col)).Value)
+                    Else
+                        sheet2Value = ""
+                    End If
+                    
+                    If CStr(ws1.Cells(row1, sheet1Cols(col)).Value) <> sheet2Value Then
+                        ws3.Cells(outputRow, outputCol).Interior.Color = RGB(255, 200, 200) ' 薄い赤
+                    End If
                 End If
                 outputCol = outputCol + 1
             Next col
@@ -101,6 +110,18 @@ Sub CompareSheets()
             For col = 0 To UBound(sheet2Cols)
                 If row1 <= lastRow2 Then
                     ws3.Cells(outputRow, outputCol).Value = ws2.Cells(row1, sheet2Cols(col)).Value
+                    
+                    ' 対応するSheet1のデータと比較して色を付ける
+                    Dim sheet1Value As String
+                    If row1 <= lastRow1 Then
+                        sheet1Value = CStr(ws1.Cells(row1, sheet1Cols(col)).Value)
+                    Else
+                        sheet1Value = ""
+                    End If
+                    
+                    If CStr(ws2.Cells(row1, sheet2Cols(col)).Value) <> sheet1Value Then
+                        ws3.Cells(outputRow, outputCol).Interior.Color = RGB(200, 200, 255) ' 薄い青
+                    End If
                 End If
                 outputCol = outputCol + 1
             Next col
@@ -109,34 +130,40 @@ Sub CompareSheets()
         End If
     Next row1
     
-    ' 結果の表示
-    If outputRow = 5 Then
-        MsgBox "差分は見つかりませんでした。", vbInformation
-        ws3.Range("A5").Value = "差分なし"
-    Else
+    ' 結果の表示と書式設定
+    If outputRow > 5 Then
+        ' 差分がある場合のみメッセージ表示
         MsgBox (outputRow - 5) & "件の差分が見つかりました。" & SHEET3_NAME & "に出力しました。", vbInformation
-        
-        ' Sheet3の書式設定
-        ' シート名の行（1行目）
-        With ws3.Range("A1:Y1")
-            .Font.Bold = True
-            .Interior.Color = RGB(180, 180, 180)
-        End With
-        
-        ' ヘッダー行（3行目）
-        With ws3.Range("A3:Y3")
-            .Font.Bold = True
-            .Interior.Color = RGB(220, 220, 220)
-        End With
-        
-        ' 罫線を追加
-        With ws3.Range("A1:Y" & (outputRow - 1))
+    End If
+    
+    ' Sheet3の書式設定（差分の有無に関わらず実行）
+    ' シート名の行（1行目）
+    With ws3.Range("B1:Y1")
+        .Font.Bold = True
+        .Interior.Color = RGB(180, 180, 180)
+    End With
+    
+    ' ヘッダー行（3行目）
+    With ws3.Range("B3:Y3")
+        .Font.Bold = True
+        .Interior.Color = RGB(220, 220, 220)
+    End With
+    
+    ' 罫線を追加（データがある場合のみ）
+    If outputRow > 5 Then
+        With ws3.Range("B1:Y" & (outputRow - 1))
             .Borders.LineStyle = xlContinuous
             .Borders.Weight = xlThin
         End With
-        
-        ' 列幅の自動調整
-        ws3.Columns("A:Y").AutoFit
+    Else
+        ' データがない場合はヘッダーのみ罫線
+        With ws3.Range("B1:Y3")
+            .Borders.LineStyle = xlContinuous
+            .Borders.Weight = xlThin
+        End With
     End If
+    
+    ' 列幅の自動調整
+    ws3.Columns("B:Y").AutoFit
     
 End Sub
