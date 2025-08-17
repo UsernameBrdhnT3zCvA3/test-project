@@ -1,1 +1,69 @@
-test
+Option Explicit
+
+'==== 必要ならここを変えてOK ====
+Const START_ROW As Long = 4        ' ログが始まる行
+Const FIRST_LOG_COL As Long = 3    ' 最初のログ列（C=3）
+Const SPLIT_MARK As String = "ST:13 EV:11"  ' 区切りキーワード
+'=================================
+
+Public Sub 整形_ログを列分割()
+    Dim ws As Worksheet: Set ws = ActiveSheet
+    Dim curCol As Long: curCol = FIRST_LOG_COL
+    Dim guard As Long: guard = 0
+    
+    Application.ScreenUpdating = False
+    Application.EnableEvents = False
+    
+    Do
+        guard = guard + 1
+        If guard > 100 Then Exit Do  ' 念のための無限ループ防止
+        
+        Dim lastRow As Long
+        lastRow = LastUsedRowInColumn(ws, curCol)
+        If lastRow < START_ROW Then Exit Do   ' この列にデータなし→終了
+        
+        ' 区切りの最初の出現位置を探す（部分一致OK）
+        Dim r As Long, hitRow As Long: hitRow = 0
+        For r = START_ROW To lastRow
+            If InStr(1, CStr(ws.Cells(r, curCol).Value), SPLIT_MARK, vbTextCompare) > 0 Then
+                hitRow = r
+                Exit For
+            End If
+        Next r
+        
+        If hitRow = 0 Then
+            Exit Do ' この列に区切りなし→終了
+        End If
+        
+        ' 区切りの下にデータがあるなら、全部 次列 の START_ROW へ移す
+        If hitRow < lastRow Then
+            Dim destCol As Long: destCol = curCol + 1
+            ' 先に次列の既存（4行目以降）をクリアしておく（再実行時の保険）
+            ws.Range(ws.Cells(START_ROW, destCol), ws.Cells(ws.Rows.Count, destCol)).Clear
+            
+            ' 切り取り移動（区切り行の“下”だけ）
+            ws.Range(ws.Cells(hitRow + 1, curCol), ws.Cells(lastRow, curCol)) _
+              .Cut Destination:=ws.Cells(START_ROW, destCol)
+        Else
+            Exit Do ' 区切りが末尾行=移すものがない→終了
+        End If
+        
+        ' 次の列へ（同じ処理を繰り返す）
+        curCol = curCol + 1
+    Loop
+    
+    Application.EnableEvents = True
+    Application.ScreenUpdating = True
+End Sub
+
+'---- その列の最終使用行を返す ----
+Private Function LastUsedRowInColumn(ws As Worksheet, ByVal col As Long) As Long
+    Dim f As Range
+    Set f = ws.Columns(col).Find(What:="*", LookIn:=xlFormulas, LookAt:=xlPart, _
+                                 SearchOrder:=xlByRows, SearchDirection:=xlPrevious, MatchCase:=False)
+    If f Is Nothing Then
+        LastUsedRowInColumn = 0
+    Else
+        LastUsedRowInColumn = f.Row
+    End If
+End Function
