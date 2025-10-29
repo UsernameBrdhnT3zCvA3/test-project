@@ -1,3 +1,45 @@
+// Core/Src/new_overrides.cpp
+#include <new>        // std::bad_alloc, std::nothrow_t
+#include <cstddef>    // size_t
+
+extern "C" {
+#include "FreeRTOS.h" // pvPortMalloc / vPortFree の宣言をCリンケージで取り込む
+}
+
+// 例外が無効でもビルドが通るようにガード
+void* operator new(std::size_t n) noexcept(false) {
+    if (void* p = pvPortMalloc(n)) return p;
+#if __cpp_exceptions
+    throw std::bad_alloc();
+#else
+    return nullptr;   // 例外無効時はnullptrを返す（呼び出し側でチェック）
+#endif
+}
+
+void  operator delete(void* p) noexcept {
+    if (p) vPortFree(p);
+}
+
+void* operator new[](std::size_t n) noexcept(false) {
+    if (void* p = pvPortMalloc(n)) return p;
+#if __cpp_exceptions
+    throw std::bad_alloc();
+#else
+    return nullptr;
+#endif
+}
+
+void  operator delete[](void* p) noexcept {
+    if (p) vPortFree(p);
+}
+
+// nothrow 版（任意だが入れておくと安全）
+void* operator new(std::size_t n, const std::nothrow_t&) noexcept { return pvPortMalloc(n); }
+void* operator new[](std::size_t n, const std::nothrow_t&) noexcept { return pvPortMalloc(n); }
+
+
+
+
 111
 // somewhere (e.g. Core/Src/new_overrides.cpp)
 #include <new>
